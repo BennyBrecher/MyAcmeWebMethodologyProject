@@ -1,11 +1,15 @@
 package com.acme.statusmgr;
 
+import com.acme.details.*;
+import com.acme.statusmgr.beans.DetailedServerStatus;
 import com.acme.statusmgr.beans.ServerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,16 +63,43 @@ public class StatusController {
             @RequestParam(value = "name", defaultValue = "Anonymous") String name,
             @RequestParam List<String> details) {
 
-        ServerStatus detailedStatus = null;
+        StatusDetailInterface detailedStatusComponent = new BasicUndecoratedStatus();
+
+        for (String detail : details) {
+            switch (detail) {
+                case "availableProcessors":
+                    detailedStatusComponent = new AvailableProcessorsDecorator(detailedStatusComponent);
+                    break;
+                case "freeJVMMemory":
+                    detailedStatusComponent = new FreeJVMMemoryDecorator(detailedStatusComponent);
+                    break;
+                case "totalJVMMemory":
+                    detailedStatusComponent = new TotalJVMMemoryDecorator(detailedStatusComponent);
+                    break;
+                case "jreVersion":
+                    detailedStatusComponent = new JREVersionDecorator(detailedStatusComponent);
+                    break;
+                case "tempLocation":
+                    detailedStatusComponent = new TempLocationDecorator(detailedStatusComponent);
+                    break;
+                default:
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid details option: " + detail);
+            }
+        }
 
         if (details != null) {
             Logger logger = LoggerFactory.getLogger("StatusController");
             logger.info("Details were provided: " + Arrays.toString(details.toArray()));
 
-            //todo Should do something with all these details that were requested
+            //todo add more meaningful logs later when we make our facade factory thingy
 
 
         }
-        return detailedStatus; //todo shouldn't just return null
+
+        return new DetailedServerStatus(
+                counter.incrementAndGet(),
+                String.format(template, name),
+                detailedStatusComponent
+        );
     }
 }
