@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @RestController
 @RequestMapping("/server")
 public class StatusController {
+    private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     protected static final String template = "Server Status requested by %s";
     protected final AtomicLong counter = new AtomicLong();
@@ -65,36 +66,40 @@ public class StatusController {
 
         StatusDetailInterface detailedStatusComponent = new BasicUndecoratedStatus();
 
+        if (details != null) {
+            logger.info("Received detailed status request from: {} with details: {}", name, details);
+        }
+
+
         for (String detail : details) {
             switch (detail) {
                 case "availableProcessors":
                     detailedStatusComponent = new AvailableProcessorsDecorator(detailedStatusComponent);
+                    logger.info("Adding availableProcessors detail to response");
                     break;
                 case "freeJVMMemory":
                     detailedStatusComponent = new FreeJVMMemoryDecorator(detailedStatusComponent);
+                    logger.info("Adding freeJVMMemory detail to response");
                     break;
                 case "totalJVMMemory":
                     detailedStatusComponent = new TotalJVMMemoryDecorator(detailedStatusComponent);
+                    logger.info("Adding totalJVMMemory detail to response");
                     break;
                 case "jreVersion":
                     detailedStatusComponent = new JREVersionDecorator(detailedStatusComponent);
+                    logger.info("Adding jreVersion detail to response");
                     break;
                 case "tempLocation":
                     detailedStatusComponent = new TempLocationDecorator(detailedStatusComponent);
+                    logger.info("Adding tempLocation detail to response");
                     break;
                 default:
+                    logger.error("Invalid detail option received: {}", detail);
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid details option: " + detail);
             }
         }
 
-        if (details != null) {
-            Logger logger = LoggerFactory.getLogger("StatusController");
-            logger.info("Details were provided: " + Arrays.toString(details.toArray()));
-
-            //todo add more meaningful logs later when we make our facade factory thingy
-
-
-        }
+        logger.info("Successfully composed detailed server status for {}", name);
 
         return new DetailedServerStatus(
                 counter.incrementAndGet(),
