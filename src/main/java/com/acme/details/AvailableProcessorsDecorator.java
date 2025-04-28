@@ -12,7 +12,7 @@ public class AvailableProcessorsDecorator extends AbstractStatusDetailDecorator 
 
     @Override
     public String getEnglishText() {
-        return super.getEnglishText()+ ", and there are " + Runtime.getRuntime().availableProcessors() + " processors available";
+        return super.getEnglishText()+ ", and there are " + facade.getAvailableProcessors() + " processors available";
     }
 
     @Override

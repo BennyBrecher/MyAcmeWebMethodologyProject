@@ -9,7 +9,7 @@ public class FreeJVMMemoryDecorator extends AbstractStatusDetailDecorator {
     }
     @Override
     public String getEnglishText() {
-        return super.getEnglishText()+", and there are "+Runtime.getRuntime().freeMemory()+" bytes of JVM memory free";
+        return super.getEnglishText()+", and there are "+ facade.getFreeJVMMemory() +" bytes of JVM memory free";
     }
 
     @Override

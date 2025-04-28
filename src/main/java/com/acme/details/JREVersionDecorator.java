@@ -10,7 +10,7 @@ public class JREVersionDecorator extends AbstractStatusDetailDecorator {
 
     @Override
     public String getEnglishText() {
-        return super.getEnglishText()+", and the JRE version is "+Runtime.version();
+        return super.getEnglishText()+", and the JRE version is "+facade.getJREVersion();
     }
 
     @Override

@@ -10,7 +10,7 @@ public class TempLocationDecorator extends AbstractStatusDetailDecorator {
 
     @Override
     public String getEnglishText() {
-        return super.getEnglishText()+", and the servers temp file location is "+System.getenv("TEMP");
+        return super.getEnglishText()+", and the servers temp file location is "+facade.getTempLocation();
     }
 
     @Override

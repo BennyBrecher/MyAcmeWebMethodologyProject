@@ -9,7 +9,7 @@ public class TotalJVMMemoryDecorator extends AbstractStatusDetailDecorator {
     }
     @Override
     public String getEnglishText() {
-        return super.getEnglishText()+", and there is a total of "+Runtime.getRuntime().totalMemory()+" bytes of JVM memory";
+        return super.getEnglishText()+", and there is a total of "+ facade.getTotalJVMMemory() +" bytes of JVM memory";
     }
 
     @Override
