@@ -77,6 +77,7 @@ public class StatusController {
                 logger.info("Adding {} detail to response", detail);
             } catch (ResponseStatusException e) {
                 logger.error("Invalid detail option received: {}", detail);
+                throw e; // i just added this like u said and now even more tests fail
             }
         }
 
