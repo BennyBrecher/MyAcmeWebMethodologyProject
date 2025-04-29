@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @RestController
 @RequestMapping("/server")
 public class StatusController {
+    private static final DetailDecoratorFactory factory = new DetailDecoratorFactory();
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     protected static final String template = "Server Status requested by %s";
@@ -70,32 +71,12 @@ public class StatusController {
             logger.info("Received detailed status request from: {} with details: {}", name, details);
         }
 
-
-        for (String detail : details) {
-            switch (detail) {
-                case "availableProcessors":
-                    detailedStatusComponent = new AvailableProcessorsDecorator(detailedStatusComponent);
-                    logger.info("Adding availableProcessors detail to response");
-                    break;
-                case "freeJVMMemory":
-                    detailedStatusComponent = new FreeJVMMemoryDecorator(detailedStatusComponent);
-                    logger.info("Adding freeJVMMemory detail to response");
-                    break;
-                case "totalJVMMemory":
-                    detailedStatusComponent = new TotalJVMMemoryDecorator(detailedStatusComponent);
-                    logger.info("Adding totalJVMMemory detail to response");
-                    break;
-                case "jreVersion":
-                    detailedStatusComponent = new JREVersionDecorator(detailedStatusComponent);
-                    logger.info("Adding jreVersion detail to response");
-                    break;
-                case "tempLocation":
-                    detailedStatusComponent = new TempLocationDecorator(detailedStatusComponent);
-                    logger.info("Adding tempLocation detail to response");
-                    break;
-                default:
-                    logger.error("Invalid detail option received: {}", detail);
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid details option: " + detail);
+        for(String detail: details){
+            try {
+                detailedStatusComponent = DetailDecoratorFactory.decorateWithDetail(detail, detailedStatusComponent);
+                logger.info("Adding {} detail to response", detail);
+            } catch (ResponseStatusException e) {
+                logger.error("Invalid detail option received: {}", detail);
             }
         }
 
