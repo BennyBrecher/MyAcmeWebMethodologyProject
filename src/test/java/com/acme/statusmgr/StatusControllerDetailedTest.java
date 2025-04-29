@@ -15,6 +15,8 @@
  */
 package com.acme.statusmgr;
 
+import com.acme.details.AbstractStatusDetailDecorator;
+import com.acme.details.MockDetailsFacade;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -43,8 +45,8 @@ public class StatusControllerDetailedTest {
      * Since this is a test, specify that all tests should use dummy system data.
      */
     @BeforeAll
-    public static void beforeAll() {
-       //todo StatusController.setSystemInfoFacade(null /* todo: Inject appropriate object */);
+    public static void setupMockFacade() {
+        AbstractStatusDetailDecorator.setFacade(new MockDetailsFacade());
     }
 
 
@@ -115,7 +117,8 @@ public class StatusControllerDetailedTest {
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.contentHeader").value("Server Status requested by Yankel"))
                 .andExpect(jsonPath("$.requestCost").value(30))
-                .andExpect(jsonPath("$.statusDesc").value("Server is up, and the server's temp file location is M:\\\\AppData\\\\Local\\\\Temp"));
+                .andExpect(jsonPath("$.statusDesc").value(
+                        "Server is up, and the server's temp file location is M:\\AppData\\Local\\Temp"));
 
     }
 
@@ -138,7 +141,7 @@ public class StatusControllerDetailedTest {
 
                 .andExpect(jsonPath("$.statusDesc")
                         .value("Server is up, and the server's temp file location is " +
-                                "M:\\\\AppData\\\\Local\\\\Temp, and there is a total of 159383552 " +
+                                "M:\\AppData\\Local\\Temp, and there is a total of 159383552 " +
                                 "bytes of JVM memory, and there are 4 processors available"));
 
     }
@@ -153,7 +156,7 @@ public class StatusControllerDetailedTest {
         this.mockMvc.perform(get("/server/status/detailed?name=Yankel"))
                 .andDo(print()).andExpect(status().isBadRequest())
                 .andExpect(status().reason(Matchers.is(
-                        "Required request parameter 'details' for method parameter type List is not present")));
+                        "Required parameter 'details' is not present.")));
 
     }
 
@@ -218,7 +221,7 @@ public class StatusControllerDetailedTest {
                 .andExpect(jsonPath("$.contentHeader").value("Server Status requested by Yankel"))
                 .andExpect(jsonPath("$.requestCost").value(72))
                 .andExpect(jsonPath("$.statusDesc").value(
-                        "Server is up, and the server's temp file location is M:\\\\AppData\\\\Local\\\\Temp" +
+                        "Server is up, and the server's temp file location is M:\\AppData\\Local\\Temp" +
                                 ", and the JRE version is 15.0.2+7-27, and there is a total of 159383552 bytes of JVM memory" +
                                 ", and there are 127268272 bytes of JVM memory free, and there are 4 processors available"));
     }

@@ -8,6 +8,8 @@ package com.acme.servermgr;
  */
 public class ServerManager {
 
+    //TODO is this where have the details switch statement to decorate?
+
     /**
      * Get the status of this server
      * @return a descriptive string about the servers status

@@ -1,11 +1,15 @@
 package com.acme.statusmgr;
 
+import com.acme.details.*;
+import com.acme.statusmgr.beans.DetailedServerStatus;
 import com.acme.statusmgr.beans.ServerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @RestController
 @RequestMapping("/server")
 public class StatusController {
+    private static final DetailDecoratorFactory factory = new DetailDecoratorFactory();
+    private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     protected static final String template = "Server Status requested by %s";
     protected final AtomicLong counter = new AtomicLong();
@@ -59,16 +65,28 @@ public class StatusController {
             @RequestParam(value = "name", defaultValue = "Anonymous") String name,
             @RequestParam List<String> details) {
 
-        ServerStatus detailedStatus = null;
+        StatusDetailInterface detailedStatusComponent = new BasicUndecoratedStatus();
 
         if (details != null) {
-            Logger logger = LoggerFactory.getLogger("StatusController");
-            logger.info("Details were provided: " + Arrays.toString(details.toArray()));
-
-            //todo Should do something with all these details that were requested
-
-
+            logger.info("Received detailed status request from: {} with details: {}", name, details);
         }
-        return detailedStatus; //todo shouldn't just return null
+
+        for(String detail: details){
+            try {
+                detailedStatusComponent = DetailDecoratorFactory.decorateWithDetail(detail, detailedStatusComponent);
+                logger.info("Adding {} detail to response", detail);
+            } catch (ResponseStatusException e) {
+                logger.error("Invalid detail option received: {}", detail);
+                throw e; // i just added this like u said and now even more tests fail
+            }
+        }
+
+        logger.info("Successfully composed detailed server status for {}", name);
+
+        return new DetailedServerStatus(
+                counter.incrementAndGet(),
+                String.format(template, name),
+                detailedStatusComponent
+        );
     }
 }
